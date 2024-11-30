@@ -9,14 +9,10 @@ from rest_framework.permissions import AllowAny
 @permission_classes([AllowAny])
 def public(_request: HttpRequest) -> JsonResponse:
     """Return response from public endpoint."""
-    message = (
-        "Hello from a public endpoint! You don't need to be authenticated to see this."
-    )
-    return JsonResponse({"message": message})
+    return JsonResponse({"message": "This is a public endpoint!"})
 
 
 @api_view(["GET"])
 def private(_request: HttpRequest) -> JsonResponse:
     """Return response from private endpoint."""
-    message = "Hello from a private endpoint! You need to be authenticated to see this."
-    return JsonResponse({"message": message})
+    return JsonResponse({"message": "This is a private endpoint!"})
