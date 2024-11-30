@@ -6,3 +6,6 @@ ignore = [
 	"D212", # Multi-line docstring summary should start at the first line
 	"COM812", # Trailing comma missing
 ]
+
+[lint.per-file-ignores]
+"__init__.py" = ["D"]
