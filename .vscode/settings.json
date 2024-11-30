@@ -5,5 +5,7 @@
 			"source.organizeImports": "always"
 		},
 		"editor.defaultFormatter": "charliermarsh.ruff"
-	}
+	},
+	"python.analysis.typeCheckingMode": "standard",
+	"python.analysis.autoImportCompletions": true
 }

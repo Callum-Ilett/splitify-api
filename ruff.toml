@@ -2,9 +2,11 @@
 select = ["ALL"]
 
 ignore = [
+	"DJ", # Django
 	"D200", # One-line docstring should fit on one line,
 	"D212", # Multi-line docstring summary should start at the first line
 	"COM812", # Trailing comma missing
+	"ERA001", # Found commented-out code
 ]
 
 [lint.per-file-ignores]
