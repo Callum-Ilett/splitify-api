@@ -12,6 +12,7 @@ ENV PYTHONUNBUFFERED=1
 # Set working directory
 WORKDIR /src
 
+
 # Install pip requirements
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
