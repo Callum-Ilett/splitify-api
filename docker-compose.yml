@@ -1,0 +1,23 @@
+services:
+  splitifyapi:
+    # Build the image from the Dockerfile in the current directory
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+
+    # Run the server
+    command: python -Xfrozen_modules=off manage.py runserver 0.0.0.0:8000
+
+    # Mount local code for development hot-reloading
+    volumes:
+      - ./src:/src
+
+    env_file:
+      - .env
+
+    ports:
+      # Expose port 8000 on container to port 8000 on host machine
+      - 8000:8000
+
+      # Expose port 3000 on container to port 3000 on host machine
+      - 3000:3000
