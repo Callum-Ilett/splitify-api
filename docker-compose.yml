@@ -1,4 +1,5 @@
 services:
+  # Define the API service
   splitifyapi:
     # Build the image from the Dockerfile in the current directory
     build:
@@ -12,12 +13,34 @@ services:
     volumes:
       - ./src:/src
 
+    # Load environment variables from .env file
     env_file:
       - .env
+
+    # Ensure the database is ready before starting the API
+    depends_on:
+      - db
 
     ports:
       # Expose port 8000 on container to port 8000 on host machine
       - 8000:8000
 
-      # Expose port 3000 on container to port 3000 on host machine
+      # Expose port 3000 (debugpy) on container to port 3000 on host machine
       - 3000:3000
+
+  # Define the database service
+  db:
+    # Use the Postgres image
+    image: postgres:16
+
+    # Mount a volume to persist the database data
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+
+volumes:
+  postgres_data:
