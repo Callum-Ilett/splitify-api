@@ -8,6 +8,14 @@ import sys
 def main() -> None:
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
+
+    from django.conf import settings
+
+    if os.environ.get("RUN_MAIN") and settings.DEBUG:
+        import debugpy  # noqa: T100
+
+        debugpy.listen(("0.0.0.0", 3000))  # noqa: S104, T100
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError:
