@@ -1,9 +1,16 @@
 **/__pycache__
+**/*.pyc
+**/*.pyo
 **/.venv
+**/venv/
+**/.pytest_cache/
+**/.coverage
+**/coverage.xml
 **/.classpath
 **/.dockerignore
 **/.env
 **/.git
+**/ruff.toml
 **/.gitignore
 **/.project
 **/.settings
@@ -23,5 +30,9 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
+**/makefile
 LICENSE
 README.md
+
+# Terraform
+infrastructure/**

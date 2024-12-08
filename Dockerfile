@@ -1,7 +1,5 @@
-# For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.12-alpine
-
-EXPOSE 8000
+# Use a specific base image tag for better predictability and multi-arch support
+FROM python:3.12-slim
 
 # Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -9,17 +7,21 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
-# Set working directory
-WORKDIR /src
-
+# Set working directory to /app
+WORKDIR /app
 
 # Install pip requirements
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 
-# Copy the current directory contents into the container at /src
+# Copy everything except what's in the .dockerignore file
 COPY . .
 
-# Creates a non-root user with an explicit UID and adds permission to access the /src folder
-RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /src
-USER appuser
+# Make scripts/entrypoint.sh executable
+RUN chmod +x ./scripts/entrypoint.sh
+
+# Expose the port that the application listens on
+EXPOSE 8000
+
+# Run the entrypoint script
+ENTRYPOINT [ "./scripts/entrypoint.sh" ]
