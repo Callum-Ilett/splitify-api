@@ -6,9 +6,6 @@ services:
       context: .
       dockerfile: ./Dockerfile
 
-    # Run the server
-    command: python -Xfrozen_modules=off manage.py runserver 0.0.0.0:8000
-
     # Mount local code for development hot-reloading
     volumes:
       - ./src:/src
