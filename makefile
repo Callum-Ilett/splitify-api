@@ -1,5 +1,5 @@
 migrate:
-	docker compose exec splitifyapi python manage.py migrate
+	docker compose exec -it splitifyapi bash -c "cd src && python manage.py migrate"
 
 migrations:
-	docker compose exec splitifyapi python manage.py makemigrations
+	docker compose exec -it splitifyapi bash -c "cd src && python manage.py makemigrations"
