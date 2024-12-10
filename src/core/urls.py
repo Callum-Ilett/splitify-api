@@ -26,5 +26,5 @@ from groups.router import groups_router
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/groups/", include(groups_router.urls)),
-    path("api/currencies/", include(currency_router.urls)),
+    path("api/currency/", include(currency_router.urls)),
 ]
