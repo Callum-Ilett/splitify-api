@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -43,6 +44,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "auth0authorization",
+    "groups",
+    "currency",
 ]
 
 REST_FRAMEWORK = {
@@ -52,6 +55,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
     ),
+    "DEFAULT_PAGINATION_CLASS": "core.pagination.StandardResultsSetPagination",
 }
 
 JWT_AUTH = {
@@ -109,6 +113,12 @@ DATABASES = {
         "PORT": os.environ.get("DB_PORT"),
     }
 }
+
+if "pytest" in sys.modules:
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": ":memory:",  # Use in-memory SQLite database
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

@@ -12,6 +12,9 @@ jobs:
     # Run on the latest Ubuntu version
     runs-on: ubuntu-latest
 
+    env:
+      DJANGO_SECRET_KEY: django-insecure-5wc994c08w=ix+%0q-z#dfi%@l-n26@cwdgdp9*z9_h=5#-ky
+
     # Define the steps to run
     steps:
       # Checkout the code

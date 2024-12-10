@@ -20,7 +20,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from currency.router import currency_router
+from groups.router import groups_router
+
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("auth0authorization.urls")),
+    path("api/groups/", include(groups_router.urls)),
+    path("api/currency/", include(currency_router.urls)),
 ]
