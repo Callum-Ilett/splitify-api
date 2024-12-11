@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import io
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser  # noqa: TC002
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client  # noqa: TC002
+from PIL import Image
 from rest_framework import status
 
 from currency.models import Currency
@@ -57,8 +61,21 @@ def create_test_group(
     return group
 
 
+def create_test_image() -> SimpleUploadedFile:
+    """Create a test image file."""
+    # Create a small test image using PIL
+    image = Image.new("RGB", (100, 100), color="red")
+    img_byte_arr = io.BytesIO()
+    image.save(img_byte_arr, format="PNG")
+    img_byte_arr = img_byte_arr.getvalue()
+
+    return SimpleUploadedFile(
+        name="test.png", content=img_byte_arr, content_type="image/png"
+    )
+
+
 @pytest.mark.django_db
-def test_success(client: Client) -> None:
+def test_delete_group_success(client: Client) -> None:
     """Test that a group can be deleted."""
     # Arrange
     user = create_test_user()
@@ -74,6 +91,32 @@ def test_success(client: Client) -> None:
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
     assert Group.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_delete_group_with_image_success(client: Client) -> None:
+    """Test that a group with an image can be deleted."""
+    # Arrange
+    user = create_test_user()
+    currency = create_test_currency()
+    image = create_test_image()
+
+    group = Group.objects.create(
+        title="Miami Summer 2024 Squad 🌴",
+        description="Planning our Miami beach vacation!",
+        currency=currency,
+        created_by=user,
+        image=image,
+    )
+
+    client.force_login(user)
+
+    # Act
+    response = client.delete(f"/api/groups/{group.id}/")
+
+    # Assert
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert not Group.objects.filter(id=group.id).exists()
 
 
 @pytest.mark.django_db
@@ -94,7 +137,7 @@ def test_unauthenticated_fails(client: Client) -> None:
 
 
 @pytest.mark.django_db
-def test_not_found(client: Client) -> None:
+def test_not_found_fails(client: Client) -> None:
     """Test that a group cannot be deleted if it does not exist."""
     # Arrange
     user = create_test_user()

@@ -38,6 +38,37 @@ def test_group_currency() -> None:
 
 
 @pytest.mark.django_db
+def test_group_image() -> None:
+    """Test that a group can have an image."""
+    # Arrange
+    currency = Currency.objects.create(
+        code="USD",
+        name="United States Dollar",
+        symbol="$",
+    )
+
+    group = Group.objects.create(
+        title="Miami Summer 2024 Squad 🌴",
+        description="Planning our Miami beach vacation!",
+        currency=currency,
+        image="test.png",
+    )
+
+    # Act
+
+    # Assert
+    assert group.title == "Miami Summer 2024 Squad 🌴"
+    assert group.description == "Planning our Miami beach vacation!"
+    assert group.currency == currency
+    assert group.created_by is None
+    assert group.updated_by is None
+    assert group.created_at
+    assert group.updated_at
+
+    assert str(group) == group.title
+
+
+@pytest.mark.django_db
 def test_group_model_audit() -> None:
     """Test that a group tracks the user who created and last updated it."""
     # Arrange

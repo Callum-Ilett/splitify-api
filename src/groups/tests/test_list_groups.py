@@ -32,9 +32,15 @@ def create_test_currency(
     return currency_model.objects.create(name=name, symbol=symbol, code=code)
 
 
+def create_test_image() -> str:
+    """Create a test image file."""
+    return "test.png"
+
+
 def create_test_group(
     title: str = "Miami Summer 2024 Squad 🌴",
     description: str = "Planning our Miami beach vacation!",
+    image: str | None = None,
     currency: Currency | None = None,
     created_by: AbstractUser | None = None,
     updated_by: AbstractUser | None = None,
@@ -46,15 +52,14 @@ def create_test_group(
     if created_by is None:
         created_by = create_test_user()
 
-    group = Group()
-    group.title = title
-    group.description = description
-    group.currency = currency
-    group.created_by = created_by
-    group.updated_by = updated_by
-    group.save()
-
-    return group
+    return Group.objects.create(
+        title=title,
+        description=description,
+        currency=currency,
+        image=image,
+        created_by=created_by,
+        updated_by=updated_by,
+    )
 
 
 @pytest.mark.django_db
@@ -127,7 +132,7 @@ def test_ascending_order_success(client: Client) -> None:
     assert response_data["previous"] is None
 
     assert len(results) == expected_group_count
-    
+
     assert results[0]["id"] == str(christmas_group.id)
     assert results[0]["title"] == "Christmas drinks 2024 🎄"
     assert results[0]["description"] == "Planning our Christmas drinks!"
@@ -164,13 +169,12 @@ def test_ascending_order_success(client: Client) -> None:
     assert results[3]["created_at"]
     assert results[3]["updated_at"]
 
+
 @pytest.mark.django_db
 def test_pagination_next_page_success(client: Client) -> None:
     """Test that a list of next page of groups can be retrieved successfully."""
     # Arrange
     user_1 = create_test_user(username="user_1", email="user_1@email.com")
-    user_2 = create_test_user(username="user_2", email="user_2@email.com")
-    user_3 = create_test_user(username="user_3", email="user_3@email.com")
 
     currency_usd = create_test_currency(
         name="USD",
@@ -201,21 +205,19 @@ def test_pagination_next_page_success(client: Client) -> None:
     )
 
     assert response.status_code == status.HTTP_200_OK
-    
+
     assert len(response_data["results"]) == expected_group_count
-    
+
     assert response_data["count"] == expected_total_groups
     assert response_data["next"] == expected_next_page_url
     assert response_data["previous"] is None
-  
+
 
 @pytest.mark.django_db
 def test_pagination_previous_page_success(client: Client) -> None:
     """Test that a list of previous page of groups can be retrieved successfully."""
     # Arrange
     user_1 = create_test_user(username="user_1", email="user_1@email.com")
-    user_2 = create_test_user(username="user_2", email="user_2@email.com")
-    user_3 = create_test_user(username="user_3", email="user_3@email.com")
 
     currency_usd = create_test_currency(
         name="USD",
@@ -244,28 +246,27 @@ def test_pagination_previous_page_success(client: Client) -> None:
     expected_previous_page_url = "http://testserver/api/groups/?limit=10"
 
     assert response.status_code == status.HTTP_200_OK
-    
+
     assert len(response_data["results"]) == expected_group_count
 
     assert response_data["count"] == expected_total_groups
     assert response_data["next"] is None
     assert response_data["previous"] == expected_previous_page_url
-    
 
-    
+
 @pytest.mark.django_db
 def test_unauthenticated_fails(client: Client) -> None:
-    """Test that a list of groups cannot be retrieved if the user is not authenticated."""
+    """Test that unauthenticated users cannot retrieve a list of groups."""
     # Arrange
     user = create_test_user()
-    
+
     currency_usd = create_test_currency(
         name="USD",
         symbol="$",
         code="USD",
     )
 
-    group = create_test_group(
+    create_test_group(
         currency=currency_usd,
         created_by=user,
     )
@@ -277,4 +278,40 @@ def test_unauthenticated_fails(client: Client) -> None:
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
+@pytest.mark.django_db
+def test_groups_with_and_without_images(client: Client) -> None:
+    """Test that groups can have images and some can have None."""
+    # Arrange
+    user = create_test_user(
+        username="user_with_image", email="user_with_image@email.com"
+    )
+    currency_usd = create_test_currency(name="USD", symbol="$", code="USD")
 
+    create_test_group(
+        title="Group with Image",
+        description="This group has an image.",
+        currency=currency_usd,
+        created_by=user,
+        image=create_test_image(),
+    )
+
+    create_test_group(
+        title="Group without Image",
+        description="This group does not have an image.",
+        currency=currency_usd,
+        created_by=user,
+        image=None,
+    )
+
+    client.force_login(user)
+
+    # Act
+    response = client.get("/api/groups/")
+    response_data = response.json()
+    results = response_data["results"]
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+
+    assert results[0]["image"] is not None
+    assert results[1]["image"] is None

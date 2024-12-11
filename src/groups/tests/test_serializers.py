@@ -1,14 +1,83 @@
 """Test the Group serializer."""
 
+import io
+
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
+from PIL import Image
 
 from currency.models import Currency
 from groups.serializers import GroupSerializer
 
 
+def create_test_image() -> SimpleUploadedFile:
+    """Create a test image file."""
+    # Create a small test image using PIL
+    image = Image.new("RGB", (100, 100), color="red")
+    img_byte_arr = io.BytesIO()
+    image.save(img_byte_arr, format="PNG")
+    img_byte_arr = img_byte_arr.getvalue()
+
+    return SimpleUploadedFile(
+        name="test.png", content=img_byte_arr, content_type="image/png"
+    )
+
+
 @pytest.mark.django_db
 def test_group_valid() -> None:
     """Test that the serializer is valid with correct data."""
+    # Arrange
+    currency = Currency()
+    currency.name = "United States Dollar"
+    currency.symbol = "$"
+    currency.code = "USD"
+    currency.save()
+
+    group = {
+        "title": "Miami Summer 2024 Squad",
+        "currency": str(currency.id),
+    }
+
+    # Act
+    serializer = GroupSerializer(data=group)
+    is_valid = serializer.is_valid()
+
+    # Assert
+    assert is_valid
+    assert serializer.errors == {}
+
+
+@pytest.mark.django_db
+def test_image_added_valid() -> None:
+    """Test that the serializer accepts a valid image."""
+    # Arrange
+    currency = Currency()
+    currency.name = "United States Dollar"
+    currency.symbol = "$"
+    currency.code = "USD"
+    currency.save()
+
+    # Create a test image
+    image_file = create_test_image()
+
+    group = {
+        "title": "Miami Summer 2024 Squad",
+        "currency": str(currency.id),
+        "image": image_file,
+    }
+
+    # Act
+    serializer = GroupSerializer(data=group)
+    is_valid = serializer.is_valid()
+
+    # Assert
+    assert is_valid
+    assert serializer.errors == {}
+
+
+@pytest.mark.django_db
+def test_image_optional_valid() -> None:
+    """Test that image field is optional."""
     # Arrange
     currency = Currency()
     currency.name = "United States Dollar"
@@ -185,3 +254,38 @@ def test_currency_blank_invalid() -> None:
     # Assert
     assert not is_valid
     assert serializer.errors == {"currency": ["This field may not be null."]}
+
+
+@pytest.mark.django_db
+def test_image_invalid_format() -> None:
+    """Test that the serializer rejects invalid image formats."""
+    # Arrange
+    currency = Currency()
+    currency.name = "United States Dollar"
+    currency.symbol = "$"
+    currency.code = "USD"
+    currency.save()
+
+    # Create an invalid file
+    invalid_file = SimpleUploadedFile(
+        name="test.txt", content=b"invalid image content", content_type="text/plain"
+    )
+
+    group = {
+        "title": "Miami Summer 2024 Squad",
+        "currency": str(currency.id),
+        "image": invalid_file,
+    }
+
+    # Act
+    serializer = GroupSerializer(data=group)
+    is_valid = serializer.is_valid()
+
+    # Assert
+    assert not is_valid
+
+    assert serializer.errors == {
+        "image": [
+            "Upload a valid image. The file you uploaded was either not an image or a corrupted image."
+        ]
+    }

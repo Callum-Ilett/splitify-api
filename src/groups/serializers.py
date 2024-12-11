@@ -36,6 +36,7 @@ class GroupSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "currency",
+            "image",
             "created_by",
             "updated_by",
             "created_at",
