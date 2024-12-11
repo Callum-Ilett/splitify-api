@@ -40,7 +40,7 @@ CSRF_TRUSTED_ORIGINS = [
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "https://dq3hdmf587.eu-west-2.awsapprunner.com",
+    "dq3hdmf587.eu-west-2.awsapprunner.com",
 ]
 
 
