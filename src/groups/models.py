@@ -29,6 +29,8 @@ class Group(models.Model):
         Currency, on_delete=models.PROTECT, related_name="groups"
     )
 
+    image = models.ImageField(upload_to="groups/images/", null=True, blank=True)
+
     created_by = models.ForeignKey(
         get_user_model(),
         null=True,
