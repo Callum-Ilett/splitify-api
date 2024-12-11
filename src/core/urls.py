@@ -23,6 +23,8 @@ from django.urls import include, path
 from currency.router import currency_router
 from groups.router import groups_router
 
+admin.site.site_header = "Splitify Admin"
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/groups/", include(groups_router.urls)),

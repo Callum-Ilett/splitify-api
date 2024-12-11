@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import io
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser  # noqa: TC002
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client  # noqa: TC002
+from django.test.client import encode_multipart
+from PIL import Image
 from rest_framework import status
 
 from currency.models import Currency
@@ -57,6 +62,19 @@ def create_test_group(
     return group
 
 
+def create_test_image() -> SimpleUploadedFile:
+    """Create a test image file."""
+    # Create a small test image using PIL
+    image = Image.new("RGB", (100, 100), color="red")
+    img_byte_arr = io.BytesIO()
+    image.save(img_byte_arr, format="PNG")
+    img_byte_arr = img_byte_arr.getvalue()
+
+    return SimpleUploadedFile(
+        name="test.png", content=img_byte_arr, content_type="image/png"
+    )
+
+
 @pytest.mark.django_db
 def test_patch_success(client: Client) -> None:
     """Test that a group can be updated successfully."""
@@ -105,7 +123,7 @@ def test_put_success(client: Client) -> None:
 
     payload = {
         "title": "Miami Winter 2025(edited)🌴",
-        "description": "Crazyness going in the winter! What to wear?",
+        "description": "Crazy going in the winter! What to wear?",
         "currency": str(currency.id),
     }
 
@@ -124,10 +142,97 @@ def test_put_success(client: Client) -> None:
 
     assert response_data["id"] == str(group.id)
     assert response_data["title"] == "Miami Winter 2025(edited)🌴"
-    assert (
-        response_data["description"] == "Crazyness going in the winter! What to wear?"
-    )
+    assert response_data["description"] == "Crazy going in the winter! What to wear?"
     assert response_data["currency"] == str(currency.id)
+    assert response_data["created_by"] == user.id  # type: ignore
+    assert response_data["updated_by"] == user.id  # type: ignore
+    assert response_data["created_at"]
+    assert response_data["updated_at"]
+
+
+@pytest.mark.django_db
+def test_update_patch_group_image_success(client: Client) -> None:
+    """Test that a group can be updated with an image."""
+    # Arrange
+    user = create_test_user()
+    currency = create_test_currency()
+    image = create_test_image()
+
+    group = create_test_group(
+        currency=currency,
+        created_by=user,
+    )
+
+    payload = {
+        "image": image,
+    }
+
+    client.force_login(user)
+
+    # Act
+    response = client.patch(
+        f"/api/groups/{group.id}/",
+        data=encode_multipart(data=payload, boundary="BoUnDaRyStRiNg"),
+        content_type="multipart/form-data; boundary=BoUnDaRyStRiNg",
+    )
+    response_data = response.json()
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+
+    assert response_data["id"] == str(group.id)
+    assert response_data["title"] == "Miami Summer 2024 Squad 🌴"
+    assert response_data["description"] == "Planning our Miami beach vacation!"
+    assert response_data["currency"] == str(currency.id)
+    assert response_data["image"] is not None
+    assert response_data["image"].startswith("http://testserver/media/groups/images/")
+    assert response_data["image"].endswith(".png")
+    assert response_data["created_by"] == user.id  # type: ignore
+    assert response_data["updated_by"] == user.id  # type: ignore
+    assert response_data["created_at"]
+    assert response_data["updated_at"]
+
+
+@pytest.mark.django_db
+def test_update_put_group_image_success(client: Client) -> None:
+    """Test that a group can be updated with an image."""
+    # Arrange
+    user = create_test_user()
+    currency = create_test_currency()
+    image = create_test_image()
+
+    group = create_test_group(
+        currency=currency,
+        created_by=user,
+    )
+
+    payload = {
+        "title": "Miami Winter 2025(edited)🌴",
+        "description": "Crazy going in the winter! What to wear?",
+        "currency": str(currency.id),
+        "image": image,
+    }
+
+    client.force_login(user)
+
+    # Act
+    response = client.put(
+        f"/api/groups/{group.id}/",
+        data=encode_multipart(data=payload, boundary="BoUnDaRyStRiNg"),
+        content_type="multipart/form-data; boundary=BoUnDaRyStRiNg",
+    )
+    response_data = response.json()
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+
+    assert response_data["id"] == str(group.id)
+    assert response_data["title"] == "Miami Winter 2025(edited)🌴"
+    assert response_data["description"] == "Crazy going in the winter! What to wear?"
+    assert response_data["currency"] == str(currency.id)
+    assert response_data["image"] is not None
+    assert response_data["image"].startswith("http://testserver/media/groups/images/")
+    assert response_data["image"].endswith(".png")
     assert response_data["created_by"] == user.id  # type: ignore
     assert response_data["updated_by"] == user.id  # type: ignore
     assert response_data["created_at"]
