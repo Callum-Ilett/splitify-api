@@ -2,20 +2,16 @@
 
 import pytest
 
-from currency.models import Currency
+from currency.tests.test_helpers import create_test_currency
 
 
 @pytest.mark.django_db
 def test_group_model() -> None:
     """Test the currency model."""
     # Arrange
-    currency = Currency()
-    currency.name = "United States Dollar"
-    currency.symbol = "$"
-    currency.code = "USD"
+    currency = create_test_currency(name="United States Dollar", code="USD", symbol="$")
 
     # Act
-    currency.save()
 
     # Assert
     assert currency.name == "United States Dollar"

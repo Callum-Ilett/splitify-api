@@ -3,22 +3,12 @@ Test views for currency app.
 """
 
 import pytest
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AbstractUser
 from django.test import Client
 from rest_framework import status
 
+from core.test_helpers import create_test_user
 from currency.models import Currency
-
-
-def create_test_user(
-    username: str = "testuser",
-    email: str = "testuser@email.com",
-) -> AbstractUser:
-    """Create a test user."""
-    user_model = get_user_model()
-
-    return user_model.objects.create_user(username, email, "testpassword")
+from currency.tests.test_helpers import create_test_currency
 
 
 class TestUnauthenticatedCurrencyView:
@@ -45,7 +35,7 @@ class TestUnauthenticatedCurrencyView:
         Test that a user cannot retrieve a currency if they are not logged in.
         """
         # Arrange
-        currency = Currency.objects.create(name="US Dollar", code="USD", symbol="$")
+        currency = create_test_currency(name="US Dollar", code="USD", symbol="$")
 
         # Act
         response = client.get(f"/api/currency/{currency.id}/")
@@ -77,7 +67,7 @@ class TestUnauthenticatedCurrencyView:
         Test that a user cannot update a currency if they are not logged in.
         """
         # Arrange
-        currency = Currency.objects.create(name="US Dollar", code="USD", symbol="$")
+        currency = create_test_currency(name="US Dollar", code="USD", symbol="$")
 
         payload = {
             "name": "UK Pound",
@@ -99,7 +89,7 @@ class TestUnauthenticatedCurrencyView:
         Test that a user cannot update a currency if they are not logged in.
         """
         # Arrange
-        currency = Currency.objects.create(name="US Dollar", code="USD", symbol="$")
+        currency = create_test_currency(name="US Dollar", code="USD", symbol="$")
 
         payload = {
             "name": "UK Pound",
@@ -119,7 +109,7 @@ class TestUnauthenticatedCurrencyView:
         Test that a user cannot delete a currency if they are not logged in.
         """
         # Arrange
-        currency = Currency.objects.create(name="US Dollar", code="USD", symbol="$")
+        currency = create_test_currency(name="US Dollar", code="USD", symbol="$")
 
         # Act
         response = client.delete(f"/api/currency/{currency.id}/")
@@ -196,8 +186,7 @@ class TestRetrieveCurrencyView:
         """
         # Arrange
         user = create_test_user()
-
-        currency = Currency.objects.create(name="US Dollar", code="USD", symbol="$")
+        currency = create_test_currency(name="US Dollar", code="USD", symbol="$")
 
         client.force_login(user)
 
@@ -242,9 +231,9 @@ class TestListCurrencyView:
         # Arrange
         user = create_test_user()
 
-        Currency.objects.create(name="US Dollar", code="USD", symbol="$")
-        Currency.objects.create(name="UK Pound", code="GBP", symbol="£")
-        Currency.objects.create(name="Euro", code="EUR", symbol="€")
+        create_test_currency(name="US Dollar", code="USD", symbol="$")
+        create_test_currency(name="UK Pound", code="GBP", symbol="£")
+        create_test_currency(name="Euro", code="EUR", symbol="€")
 
         client.force_login(user)
 
@@ -311,8 +300,7 @@ class TestUpdateCurrencyView:
         """
         # Arrange
         user = create_test_user()
-
-        currency = Currency.objects.create(name="US Dollar", code="USD", symbol="$")
+        currency = create_test_currency(name="US Dollar", code="USD", symbol="$")
 
         payload = {
             "name": "UK Pound",
@@ -342,8 +330,7 @@ class TestUpdateCurrencyView:
         """
         # Arrange
         user = create_test_user()
-
-        currency = Currency.objects.create(name="US Dollar", code="USD", symbol="$")
+        currency = create_test_currency(name="US Dollar", code="USD", symbol="$")
 
         payload = {
             "name": "USA Dollar",
@@ -373,7 +360,8 @@ class TestUpdateCurrencyView:
         """
         # Arrange
         user = create_test_user()
-        currency = Currency.objects.create(name="US Dollar", code="USD", symbol="$")
+        currency = create_test_currency(name="US Dollar", code="USD", symbol="$")
+
         payload = {
             "name": "",
             "code": "",
@@ -407,8 +395,7 @@ class TestDeleteCurrencyView:
         """
         # Arrange
         user = create_test_user()
-
-        currency = Currency.objects.create(name="US Dollar", code="USD", symbol="$")
+        currency = create_test_currency(name="US Dollar", code="USD", symbol="$")
 
         client.force_login(user)
 
@@ -428,8 +415,7 @@ class TestDeleteCurrencyView:
         """
         # Arrange
         user = create_test_user()
-
-        Currency.objects.create(name="US Dollar", code="USD", symbol="$")
+        create_test_currency(name="US Dollar", code="USD", symbol="$")
 
         client.force_login(user)
 
