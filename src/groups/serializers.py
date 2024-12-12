@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 
-from groups.models import Group
+from groups.models import Group, GroupMember
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -44,3 +44,14 @@ class GroupSerializer(serializers.ModelSerializer):
         )
 
         read_only_fields = ("created_by", "updated_by", "created_at", "updated_at")
+
+
+class GroupMemberSerializer(serializers.ModelSerializer):
+    """Group member serializer."""
+
+    class Meta:
+        """Meta class."""
+
+        model = GroupMember
+
+        fields = ("id", "user", "group", "role", "created_at", "updated_at")

@@ -21,7 +21,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 from currency.router import currency_router
-from groups.router import groups_router
+from groups.router import group_members_router, groups_router
 
 admin.site.site_header = "Splitify Admin"
 
@@ -29,4 +29,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/groups/", include(groups_router.urls)),
     path("api/currency/", include(currency_router.urls)),
+    path("api/group-members/", include(group_members_router.urls)),
 ]
