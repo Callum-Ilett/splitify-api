@@ -1,37 +1,18 @@
 """Test the Group serializer."""
 
-import io
-
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
-from PIL import Image
 
-from currency.models import Currency
+from core.test_helpers import create_test_image
+from currency.tests.test_helpers import create_test_currency
 from groups.serializers import GroupSerializer
-
-
-def create_test_image() -> SimpleUploadedFile:
-    """Create a test image file."""
-    # Create a small test image using PIL
-    image = Image.new("RGB", (100, 100), color="red")
-    img_byte_arr = io.BytesIO()
-    image.save(img_byte_arr, format="PNG")
-    img_byte_arr = img_byte_arr.getvalue()
-
-    return SimpleUploadedFile(
-        name="test.png", content=img_byte_arr, content_type="image/png"
-    )
 
 
 @pytest.mark.django_db
 def test_group_valid() -> None:
     """Test that the serializer is valid with correct data."""
     # Arrange
-    currency = Currency()
-    currency.name = "United States Dollar"
-    currency.symbol = "$"
-    currency.code = "USD"
-    currency.save()
+    currency = create_test_currency()
 
     group = {
         "title": "Miami Summer 2024 Squad",
@@ -51,11 +32,7 @@ def test_group_valid() -> None:
 def test_image_added_valid() -> None:
     """Test that the serializer accepts a valid image."""
     # Arrange
-    currency = Currency()
-    currency.name = "United States Dollar"
-    currency.symbol = "$"
-    currency.code = "USD"
-    currency.save()
+    currency = create_test_currency()
 
     # Create a test image
     image_file = create_test_image()
@@ -79,11 +56,7 @@ def test_image_added_valid() -> None:
 def test_image_optional_valid() -> None:
     """Test that image field is optional."""
     # Arrange
-    currency = Currency()
-    currency.name = "United States Dollar"
-    currency.symbol = "$"
-    currency.code = "USD"
-    currency.save()
+    currency = create_test_currency()
 
     group = {
         "title": "Miami Summer 2024 Squad",
@@ -103,11 +76,7 @@ def test_image_optional_valid() -> None:
 def test_title_blank_invalid() -> None:
     """Test that the Group title is required."""
     # Arrange
-    currency = Currency()
-    currency.name = "United States Dollar"
-    currency.symbol = "$"
-    currency.code = "USD"
-    currency.save()
+    currency = create_test_currency()
 
     group = {"title": "", "currency": str(currency.id)}
 
@@ -124,11 +93,7 @@ def test_title_blank_invalid() -> None:
 def test_title_null_invalid() -> None:
     """Test that the Group title is required."""
     # Arrange
-    currency = Currency()
-    currency.name = "United States Dollar"
-    currency.symbol = "$"
-    currency.code = "USD"
-    currency.save()
+    currency = create_test_currency()
 
     group = {"title": None, "currency": str(currency.id)}
 
@@ -147,11 +112,7 @@ def test_title_null_invalid() -> None:
 def test_title_required_invalid() -> None:
     """Test that the Group title is required."""
     # Arrange
-    currency = Currency()
-    currency.name = "United States Dollar"
-    currency.symbol = "$"
-    currency.code = "USD"
-    currency.save()
+    currency = create_test_currency()
 
     group = {"currency": str(currency.id)}
 
@@ -168,11 +129,7 @@ def test_title_required_invalid() -> None:
 def test_title_max_length_invalid() -> None:
     """Test that the Group title max length is 255 characters."""
     # Arrange
-    currency = Currency()
-    currency.name = "United States Dollar"
-    currency.symbol = "$"
-    currency.code = "USD"
-    currency.save()
+    currency = create_test_currency()
 
     group = {"title": "a" * 256, "currency": str(currency.id)}
 
@@ -192,6 +149,7 @@ def test_currency_invalid() -> None:
     """Test that the serializer rejects non-existent currency IDs."""
     # Arrange
     currency_id = "fc49ca12-b54b-49e8-94e3-e8c49e894e3e"
+
     group = {
         "title": "Miami Summer 2024 Squad",
         "description": "Planning our Miami beach vacation!",
@@ -260,11 +218,7 @@ def test_currency_blank_invalid() -> None:
 def test_image_invalid_format() -> None:
     """Test that the serializer rejects invalid image formats."""
     # Arrange
-    currency = Currency()
-    currency.name = "United States Dollar"
-    currency.symbol = "$"
-    currency.code = "USD"
-    currency.save()
+    currency = create_test_currency()
 
     # Create an invalid file
     invalid_file = SimpleUploadedFile(

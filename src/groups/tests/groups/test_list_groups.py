@@ -3,63 +3,12 @@
 from __future__ import annotations
 
 import pytest
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AbstractUser  # noqa: TC002
 from django.test import Client  # noqa: TC002
 from rest_framework import status
 
-from currency.models import Currency
-from groups.models import Group
-
-
-def create_test_user(
-    username: str = "testuser",
-    email: str = "testuser@email.com",
-) -> AbstractUser:
-    """Create a test user."""
-    user_model = get_user_model()
-
-    return user_model.objects.create_user(username, email, "testpassword")
-
-
-def create_test_currency(
-    name: str = "USD",
-    symbol: str = "$",
-    code: str = "USD",
-) -> Currency:
-    """Create a test currency."""
-    currency_model = Currency
-    return currency_model.objects.create(name=name, symbol=symbol, code=code)
-
-
-def create_test_image() -> str:
-    """Create a test image file."""
-    return "test.png"
-
-
-def create_test_group(
-    title: str = "Miami Summer 2024 Squad 🌴",
-    description: str = "Planning our Miami beach vacation!",
-    image: str | None = None,
-    currency: Currency | None = None,
-    created_by: AbstractUser | None = None,
-    updated_by: AbstractUser | None = None,
-) -> Group:
-    """Create a test group."""
-    if currency is None:
-        currency = create_test_currency()
-
-    if created_by is None:
-        created_by = create_test_user()
-
-    return Group.objects.create(
-        title=title,
-        description=description,
-        currency=currency,
-        image=image,
-        created_by=created_by,
-        updated_by=updated_by,
-    )
+from core.test_helpers import create_test_image, create_test_user
+from currency.tests.test_helpers import create_test_currency
+from groups.tests.groups.test_helpers import create_test_group
 
 
 @pytest.mark.django_db
@@ -282,17 +231,16 @@ def test_unauthenticated_fails(client: Client) -> None:
 def test_groups_with_and_without_images(client: Client) -> None:
     """Test that groups can have images and some can have None."""
     # Arrange
-    user = create_test_user(
-        username="user_with_image", email="user_with_image@email.com"
-    )
+    user = create_test_user(username="user_1", email="user_1@email.com")
     currency_usd = create_test_currency(name="USD", symbol="$", code="USD")
+    image = "image.png"
 
     create_test_group(
         title="Group with Image",
         description="This group has an image.",
         currency=currency_usd,
         created_by=user,
-        image=create_test_image(),
+        image=image,
     )
 
     create_test_group(

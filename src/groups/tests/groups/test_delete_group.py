@@ -2,76 +2,14 @@
 
 from __future__ import annotations
 
-import io
-
 import pytest
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AbstractUser  # noqa: TC002
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client  # noqa: TC002
-from PIL import Image
 from rest_framework import status
 
-from currency.models import Currency
+from core.test_helpers import create_test_image, create_test_user
+from currency.tests.test_helpers import create_test_currency
 from groups.models import Group
-
-
-def create_test_user(
-    username: str = "testuser",
-    email: str = "testuser@email.com",
-) -> AbstractUser:
-    """Create a test user."""
-    user_model = get_user_model()
-
-    return user_model.objects.create_user(username, email, "testpassword")
-
-
-def create_test_currency(
-    name: str = "USD",
-    symbol: str = "$",
-    code: str = "USD",
-) -> Currency:
-    """Create a test currency."""
-    currency_model = Currency
-    return currency_model.objects.create(name=name, symbol=symbol, code=code)
-
-
-def create_test_group(
-    title: str = "Miami Summer 2024 Squad 🌴",
-    description: str = "Planning our Miami beach vacation!",
-    currency: Currency | None = None,
-    created_by: AbstractUser | None = None,
-    updated_by: AbstractUser | None = None,
-) -> Group:
-    """Create a test group."""
-    if currency is None:
-        currency = create_test_currency()
-
-    if created_by is None:
-        created_by = create_test_user()
-
-    group = Group()
-    group.title = title
-    group.description = description
-    group.currency = currency
-    group.created_by = created_by
-    group.updated_by = updated_by
-    group.save()
-
-    return group
-
-
-def create_test_image() -> SimpleUploadedFile:
-    """Create a test image file."""
-    # Create a small test image using PIL
-    image = Image.new("RGB", (100, 100), color="red")
-    img_byte_arr = io.BytesIO()
-    image.save(img_byte_arr, format="PNG")
-    img_byte_arr = img_byte_arr.getvalue()
-
-    return SimpleUploadedFile(
-        name="test.png", content=img_byte_arr, content_type="image/png"
-    )
+from groups.tests.groups.test_helpers import create_test_group
 
 
 @pytest.mark.django_db
