@@ -54,9 +54,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "colorfield",
     "auth0authorization",
     "groups",
     "currency",
+    "categories",
 ]
 
 REST_FRAMEWORK = {
