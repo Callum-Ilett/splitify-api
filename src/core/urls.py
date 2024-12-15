@@ -20,6 +20,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from categories.router import router as categories_router
 from currency.router import currency_router
 from groups.router import group_members_router, groups_router
 
@@ -30,4 +31,5 @@ urlpatterns = [
     path("api/groups/", include(groups_router.urls)),
     path("api/currency/", include(currency_router.urls)),
     path("api/group-members/", include(group_members_router.urls)),
+    path("api/categories/", include(categories_router.urls)),
 ]
