@@ -7,6 +7,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from categories.models import Category
 from currency.models import Currency
 
 
@@ -43,6 +44,10 @@ class Group(models.Model):
 
     members = models.ManyToManyField(
         get_user_model(), through="GroupMember", related_name="joined_groups"
+    )
+
+    categories = models.ManyToManyField(
+        Category, related_name="associated_categories", blank=True
     )
 
     created_by = models.ForeignKey(
