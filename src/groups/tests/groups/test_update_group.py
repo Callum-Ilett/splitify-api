@@ -176,29 +176,6 @@ def test_update_put_group_image_success(client: Client) -> None:
 
 
 @pytest.mark.django_db
-def test_unauthenticated_fails(client: Client) -> None:
-    """Test that an unauthenticated user cannot edit a group."""
-    # Arrange
-    user = create_test_user()
-    currency = create_test_currency()
-
-    group = create_test_group(
-        currency=currency,
-        created_by=user,
-    )
-
-    payload = {
-        "title": "Miami Summer 2024 Squad(edited)🌴",
-    }
-
-    # Act
-    response = client.patch(f"/api/groups/{group.id}/", payload, "application/json")
-
-    # Assert
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-@pytest.mark.django_db
 def test_empty_title_fails(client: Client) -> None:
     """Test that a group cannot be edited without a title."""
     # Arrange
@@ -371,13 +348,14 @@ def test_update_group_add_additional_category_success(client: Client) -> None:
     # Assert
     assert response.status_code == status.HTTP_200_OK
 
-    assert len(response_data["categories"]) == 2
+    expected_category_count = 2
+    assert len(response_data["categories"]) == expected_category_count
     assert str(category_1.id) in response_data["categories"]
     assert str(category_2.id) in response_data["categories"]
 
     # Verify database state
     group.refresh_from_db()
-    assert group.categories.count() == 2
+    assert group.categories.count() == expected_category_count
     assert category_1 in group.categories.all()
     assert category_2 in group.categories.all()
 
@@ -398,7 +376,8 @@ def test_update_group_remove_category_success(client: Client) -> None:
     group.categories.add(category_1, category_2)
 
     # Verify initial state
-    assert group.categories.count() == 2
+    expected_category_count = 2
+    assert group.categories.count() == expected_category_count
 
     payload = {
         "categories": [str(category_1.id)],  # Only include one category

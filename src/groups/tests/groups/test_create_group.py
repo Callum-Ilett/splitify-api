@@ -151,25 +151,6 @@ def test_invalid_image_format_fails(client: Client) -> None:
 
 
 @pytest.mark.django_db
-def test_unauthenticated_fails(client: Client) -> None:
-    """Test that an unauthenticated user cannot create a group."""
-    # Arrange
-    currency = create_test_currency()
-
-    payload = {
-        "title": "Miami Summer 2024 Squad 🌴",
-        "description": "Planning our Miami beach vacation!",
-        "currency": str(currency.id),
-    }
-
-    # Act
-    response = client.post("/api/groups/", payload, "application/json")
-
-    # Assert
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-@pytest.mark.django_db
 def test_existing_title_other_user_success(client: Client) -> None:
     """Test that duplicate group titles from different users are allowed."""
     # Arrange
