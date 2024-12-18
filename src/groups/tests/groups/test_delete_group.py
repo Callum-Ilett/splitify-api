@@ -6,6 +6,7 @@ import pytest
 from django.test import Client  # noqa: TC002
 from rest_framework import status
 
+from categories.tests.test_helpers import create_emoji_test_category
 from core.test_helpers import create_test_image, create_test_user
 from currency.tests.test_helpers import create_test_currency
 from groups.models import Group
@@ -55,6 +56,24 @@ def test_delete_group_with_image_success(client: Client) -> None:
     # Assert
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert not Group.objects.filter(id=group.id).exists()
+
+
+@pytest.mark.django_db
+def test_delete_group_with_categories_success(client: Client) -> None:
+    """Test that a group with categories can be deleted."""
+    # Arrange
+    user = create_test_user()
+    group = create_test_group(created_by=user)
+    category = create_emoji_test_category(name="Trip", emoji="🛫")
+    group.categories.add(category)
+
+    client.force_login(user)
+
+    # Act
+    response = client.delete(f"/api/groups/{group.id}/")
+
+    # Assert
+    assert response.status_code == status.HTTP_204_NO_CONTENT
 
 
 @pytest.mark.django_db

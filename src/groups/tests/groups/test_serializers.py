@@ -3,6 +3,7 @@
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from categories.tests.test_helpers import create_emoji_test_category
 from core.test_helpers import create_test_image
 from currency.tests.test_helpers import create_test_currency
 from groups.serializers import GroupSerializer
@@ -61,6 +62,29 @@ def test_image_optional_valid() -> None:
     group = {
         "title": "Miami Summer 2024 Squad",
         "currency": str(currency.id),
+    }
+
+    # Act
+    serializer = GroupSerializer(data=group)
+    is_valid = serializer.is_valid()
+
+    # Assert
+    assert is_valid
+    assert serializer.errors == {}
+
+
+@pytest.mark.django_db
+def test_categories_valid() -> None:
+    """Test that the serializer accepts valid categories."""
+    # Arrange
+    currency = create_test_currency()
+    category_1 = create_emoji_test_category(name="Trip", emoji="🛫")
+    category_2 = create_emoji_test_category(name="Holiday", emoji="🏖️")
+
+    group = {
+        "title": "Miami Summer 2024 Squad",
+        "currency": str(currency.id),
+        "categories": [str(category_1.id), str(category_2.id)],
     }
 
     # Act
@@ -164,6 +188,33 @@ def test_currency_invalid() -> None:
     assert not is_valid
     assert serializer.errors == {
         "currency": [
+            'Invalid pk "fc49ca12-b54b-49e8-94e3-e8c49e894e3e" - object does not exist.'
+        ]
+    }
+
+
+@pytest.mark.django_db
+def test_categories_invalid() -> None:
+    """Test that the serializer rejects non-existent category IDs."""
+    # Arrange
+    currency = create_test_currency()
+    category_id = "fc49ca12-b54b-49e8-94e3-e8c49e894e3e"
+
+    group = {
+        "title": "Miami Summer 2024 Squad",
+        "description": "Planning our Miami beach vacation!",
+        "currency": str(currency.id),
+        "categories": [category_id],
+    }
+
+    # Act
+    serializer = GroupSerializer(data=group)
+    is_valid = serializer.is_valid()
+
+    # Assert
+    assert not is_valid
+    assert serializer.errors == {
+        "categories": [
             'Invalid pk "fc49ca12-b54b-49e8-94e3-e8c49e894e3e" - object does not exist.'
         ]
     }
