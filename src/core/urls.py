@@ -19,6 +19,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
+from rest_framework import routers
 
 from categories.router import router as categories_router
 from currency.router import currency_router
@@ -26,10 +27,14 @@ from groups.router import group_members_router, groups_router
 
 admin.site.site_header = "Splitify Admin"
 
+api_router = routers.DefaultRouter()
+
+api_router.registry.extend(groups_router.registry)
+api_router.registry.extend(group_members_router.registry)
+api_router.registry.extend(categories_router.registry)
+api_router.registry.extend(currency_router.registry)
+
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/groups/", include(groups_router.urls)),
-    path("api/currency/", include(currency_router.urls)),
-    path("api/group-members/", include(group_members_router.urls)),
-    path("api/categories/", include(categories_router.urls)),
+    path("api/", include(api_router.urls)),
 ]
