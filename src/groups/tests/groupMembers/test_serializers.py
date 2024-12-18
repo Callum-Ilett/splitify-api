@@ -13,12 +13,12 @@ from groups.tests.groups.test_helpers import create_test_group
 def test_group_member_valid() -> None:
     """Test that the serializer is valid with correct data."""
     # Arrange
-    user = create_test_user()
+    user = create_test_user(username="testuser1", email="testuser1@email.com")
     currency = create_test_currency()
     group = create_test_group(currency=currency)
 
     group_member = {
-        "user": str(user.id),  # type: ignore
+        "user": str(user.pk),
         "group": str(group.id),
         "role": GroupMemberRole.MEMBER,
     }
@@ -57,10 +57,10 @@ def test_user_required_invalid() -> None:
 def test_group_required_invalid() -> None:
     """Test that the group field is required."""
     # Arrange
-    user = create_test_user()
+    user = create_test_user(username="testuser1", email="testuser1@email.com")
 
     group_member = {
-        "user": str(user.id),  # type: ignore
+        "user": str(user.pk),
         "role": GroupMemberRole.MEMBER,
     }
 
@@ -99,10 +99,10 @@ def test_invalid_user_id() -> None:
 def test_invalid_group_id() -> None:
     """Test that the serializer rejects non-existent group IDs."""
     # Arrange
-    user = create_test_user()
+    user = create_test_user(username="testuser1", email="testuser1@email.com")
 
     group_member = {
-        "user": str(user.id),  # type: ignore
+        "user": str(user.pk),
         "group": "nonexistent-uuid",
         "role": GroupMemberRole.MEMBER,
     }
@@ -120,7 +120,7 @@ def test_invalid_group_id() -> None:
 def test_invalid_role() -> None:
     """Test that the serializer rejects invalid role values."""
     # Arrange
-    user = create_test_user()
+    user = create_test_user(username="testuser1", email="testuser1@email.com")
     currency = create_test_currency()
     group = Group.objects.create(title="Test Group", currency=currency, created_by=user)
 

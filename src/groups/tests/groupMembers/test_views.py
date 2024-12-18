@@ -22,7 +22,7 @@ class TestGroupMembersViewUnauthenticated:
 
         payload = {
             "group": str(group.id),
-            "user": str(user.id),  # type: ignore
+            "user": str(user.pk),
         }
 
         # Act
@@ -37,7 +37,7 @@ class TestGroupMembersViewUnauthenticated:
     ) -> None:
         """Test that a user cannot edit a group member when not authenticated."""
         # Arrange
-        user = create_test_user()
+        user = create_test_user(username="testuser1", email="testuser1@email.com")
         group = create_test_group()
         group_member = create_test_group_member(user=user, group=group)
 
@@ -59,13 +59,13 @@ class TestGroupMembersViewUnauthenticated:
     def test_edit_put_group_member_unauthenticated_fails(self, client: Client) -> None:
         """Test that a user cannot edit a group member when not authenticated."""
         # Arrange
-        user = create_test_user()
+        user = create_test_user(username="testuser1", email="testuser1@email.com")
         group = create_test_group()
         group_member = create_test_group_member(user=user, group=group)
 
         payload = {
             "group": str(group.id),
-            "user": str(user.id),  # type: ignore
+            "user": str(user.pk),
             "role": "ADMIN",
         }
 
@@ -83,7 +83,7 @@ class TestGroupMembersViewUnauthenticated:
     def test_delete_group_member_unauthenticated_fails(self, client: Client) -> None:
         """Test that a user cannot delete a group member when not authenticated."""
         # Arrange
-        user = create_test_user()
+        user = create_test_user(username="testuser1", email="testuser1@email.com")
         group = create_test_group()
         group_member = create_test_group_member(user=user, group=group)
 
@@ -97,7 +97,7 @@ class TestGroupMembersViewUnauthenticated:
     def test_get_group_members_unauthenticated_fails(self, client: Client) -> None:
         """Test that a user cannot get group members when not authenticated."""
         # Arrange
-        user = create_test_user()
+        user = create_test_user(username="testuser1", email="testuser1@email.com")
         group = create_test_group()
         create_test_group_member(user=user, group=group)
 
@@ -111,7 +111,7 @@ class TestGroupMembersViewUnauthenticated:
     def test_retrieve_group_members_unauthenticated_fails(self, client: Client) -> None:
         """Test that a user cannot retrieve group members when not authenticated."""
         # Arrange
-        user = create_test_user()
+        user = create_test_user(username="testuser1", email="testuser1@email.com")
         group = create_test_group()
         group_member = create_test_group_member(user=user, group=group)
 
@@ -129,7 +129,7 @@ class TestCreateGroupMemberView:
     def test_create_group_member_success(self, client: Client) -> None:
         """Test that a group member can be created successfully."""
         # Arrange
-        user = create_test_user()
+        user = create_test_user(username="testuser1", email="testuser1@email.com")
         group = create_test_group()
 
         payload = {
@@ -157,7 +157,7 @@ class TestCreateGroupMemberView:
     def test_create_group_member_admin_success(self, client: Client) -> None:
         """Test that a group member can be created with admin role."""
         # Arrange
-        user = create_test_user()
+        user = create_test_user(username="testuser1", email="testuser1@email.com")
         group = create_test_group()
 
         payload = {
@@ -185,7 +185,7 @@ class TestCreateGroupMemberView:
     def test_create_group_member_owner_success(self, client: Client) -> None:
         """Test that a group member can be created with owner role."""
         # Arrange
-        user = create_test_user()
+        user = create_test_user(username="testuser1", email="testuser1@email.com")
         group = create_test_group()
 
         payload = {
@@ -209,6 +209,35 @@ class TestCreateGroupMemberView:
         assert response_data["created_at"]
         assert response_data["updated_at"]
 
+    @pytest.mark.django_db
+    def test_create_group_member_existing_group_member_fails(
+        self, client: Client
+    ) -> None:
+        """Test that a group member cannot be created with an existing group member."""
+        # Arrange
+        user = create_test_user(username="testuser1", email="testuser1@email.com")
+        group = create_test_group()
+        create_test_group_member(user=user, group=group)
+
+        payload = {
+            "group": str(group.id),
+            "user": str(user.pk),
+            "role": GroupMemberRole.MEMBER,
+        }
+
+        client.force_login(user)
+
+        # Act
+        response = client.post("/api/group-members/", payload, "application/json")
+        response_data = response.json()
+
+        # Assert
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        assert response_data["non_field_errors"] == [
+            "The fields user, group must make a unique set."
+        ]
+
 
 class TestEditGroupMemberView:
     """Test edit group member view."""
@@ -217,7 +246,7 @@ class TestEditGroupMemberView:
     def test_edit_group_member_role_success(self, client: Client) -> None:
         """Test that a group member's role can be updated."""
         # Arrange
-        user = create_test_user()
+        user = create_test_user(username="testuser1", email="testuser1@email.com")
         group = create_test_group()
         group_member = create_test_group_member(
             user=user, group=group, role=GroupMemberRole.MEMBER
@@ -275,7 +304,7 @@ class TestRetrieveGroupMemberView:
     def test_retrieve_group_member_success(self, client: Client) -> None:
         """Test that a group member can be retrieved."""
         # Arrange
-        user = create_test_user()
+        user = create_test_user(username="testuser1", email="testuser1@email.com")
         group = create_test_group()
         group_member = create_test_group_member(user=user, group=group)
 
@@ -380,7 +409,7 @@ class TestDeleteGroupMemberView:
     def test_delete_group_member_success(self, client: Client) -> None:
         """Test that a group member can be deleted."""
         # Arrange
-        user = create_test_user()
+        user = create_test_user(username="testuser1", email="testuser1@email.com")
         group = create_test_group()
         group_member = create_test_group_member(user=user, group=group)
 

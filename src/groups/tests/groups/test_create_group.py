@@ -242,9 +242,9 @@ def test_existing_title_case_insensitive_fails(client: Client) -> None:
     # Act
     response = client.post("/api/groups/", payload, "application/json")
     response_data = response.json()
+    expected_error = "A group with this title already exists for this user."
 
     # Assert
-    expected_error = "A group with this title already exists for this user."
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response_data["title"][0] == expected_error
 

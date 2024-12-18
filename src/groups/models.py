@@ -1,6 +1,7 @@
 """Group model."""
 
 import uuid
+from typing import ClassVar
 
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -35,6 +36,7 @@ class Group(models.Model):
         - updated_by: ForeignKey to the user who last updated the group
         - created_at: DateTimeField representing when the group was created
         - updated_at: DateTimeField representing when the group was last updated
+
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -75,6 +77,17 @@ class Group(models.Model):
 
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        """Meta class for the Group model."""
+
+        constraints: ClassVar[list] = [
+            models.UniqueConstraint(
+                models.functions.Lower("title"),
+                "created_by",
+                name="unique_group_title_per_user_case_insensitive",
+            )
+        ]
+
     def __str__(self) -> str:
         """Return the string representation of the group."""
         return self.title
@@ -111,6 +124,15 @@ class GroupMember(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        """Meta class for the GroupMember model."""
+
+        constraints: ClassVar[list] = [
+            models.UniqueConstraint(
+                fields=["user", "group"], name="unique_group_member"
+            )
+        ]
 
     def __str__(self) -> str:
         """Return the string representation of the group member."""
