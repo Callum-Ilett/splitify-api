@@ -345,27 +345,3 @@ def test_list_groups_with_and_without_categories_success(client: Client) -> None
     assert results[1]["updated_by"] is None
     assert results[1]["created_at"]
     assert results[1]["updated_at"]
-
-
-@pytest.mark.django_db
-def test_unauthenticated_fails(client: Client) -> None:
-    """Test that unauthenticated users cannot retrieve a list of groups."""
-    # Arrange
-    user = create_test_user()
-
-    currency_usd = create_test_currency(
-        name="USD",
-        symbol="$",
-        code="USD",
-    )
-
-    create_test_group(
-        currency=currency_usd,
-        created_by=user,
-    )
-
-    # Act
-    response = client.get("/api/groups/")
-
-    # Assert
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED

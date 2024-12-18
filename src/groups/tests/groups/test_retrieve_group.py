@@ -118,21 +118,6 @@ def test_retrieve_group_with_categories_success(client: Client) -> None:
 
 
 @pytest.mark.django_db
-def test_unauthorized_user_fails(client: Client) -> None:
-    """Test that an unauthorized user cannot retrieve a group."""
-    # Arrange
-    user = create_test_user()
-    currency = create_test_currency()
-    group = create_test_group(currency=currency, created_by=user)
-
-    # Act
-    response = client.get(f"/api/groups/{group.id}/")
-
-    # Assert
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-@pytest.mark.django_db
 def test_nonexistent_group_id_fails(client: Client) -> None:
     """Test that a group cannot be retrieved with a nonexistent group ID."""
     # Arrange

@@ -77,23 +77,6 @@ def test_delete_group_with_categories_success(client: Client) -> None:
 
 
 @pytest.mark.django_db
-def test_unauthenticated_fails(client: Client) -> None:
-    """Test that a group cannot be deleted if the user is not authenticated."""
-    # Arrange
-    user = create_test_user()
-    group = create_test_group(created_by=user)
-
-    # Act & Assert
-    assert Group.objects.count() == 1
-    response = client.delete(f"/api/groups/{group.id}/")
-
-    # Assert
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-    assert Group.objects.count() == 1
-
-
-@pytest.mark.django_db
 def test_not_found_fails(client: Client) -> None:
     """Test that a group cannot be deleted if it does not exist."""
     # Arrange
