@@ -43,10 +43,10 @@ def test_category_model_parent() -> None:
         name="Games", emoji="🎮", background_color="#000000", icon="icon.png"
     )
 
-    subcategory_1.parent = main_category  # type: ignore
+    subcategory_1.parent = main_category  # type: ignore  # noqa: PGH003
     subcategory_1.save()
 
-    subcategory_2.parent = main_category  # type: ignore
+    subcategory_2.parent = main_category  # type: ignore  # noqa: PGH003
     subcategory_2.save()
 
     # Act
