@@ -5,6 +5,7 @@ import uuid
 from django.contrib.auth import get_user_model
 from django.db import models
 
+from categories.models import Category
 from currency.models import Currency
 
 
@@ -41,6 +42,10 @@ class Group(models.Model):
 
     members = models.ManyToManyField(
         get_user_model(), through="GroupMember", related_name="joined_groups"
+    )
+
+    categories = models.ManyToManyField(
+        Category, related_name="associated_categories", blank=True
     )
 
     created_by = models.ForeignKey(

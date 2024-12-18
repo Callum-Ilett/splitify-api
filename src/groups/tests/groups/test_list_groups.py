@@ -1,12 +1,11 @@
-"""Test delete group."""
-
-from __future__ import annotations
+"""Test list groups."""
 
 import pytest
-from django.test import Client  # noqa: TC002
+from django.test import Client
 from rest_framework import status
 
-from core.test_helpers import create_test_image, create_test_user
+from categories.tests.test_helpers import create_emoji_test_category
+from core.test_helpers import create_test_user
 from currency.tests.test_helpers import create_test_currency
 from groups.tests.groups.test_helpers import create_test_group
 
@@ -204,31 +203,7 @@ def test_pagination_previous_page_success(client: Client) -> None:
 
 
 @pytest.mark.django_db
-def test_unauthenticated_fails(client: Client) -> None:
-    """Test that unauthenticated users cannot retrieve a list of groups."""
-    # Arrange
-    user = create_test_user()
-
-    currency_usd = create_test_currency(
-        name="USD",
-        symbol="$",
-        code="USD",
-    )
-
-    create_test_group(
-        currency=currency_usd,
-        created_by=user,
-    )
-
-    # Act
-    response = client.get("/api/groups/")
-
-    # Assert
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-@pytest.mark.django_db
-def test_groups_with_and_without_images(client: Client) -> None:
+def test_groups_with_and_without_images_success(client: Client) -> None:
     """Test that groups can have images and some can have None."""
     # Arrange
     user = create_test_user(username="user_1", email="user_1@email.com")
@@ -263,3 +238,134 @@ def test_groups_with_and_without_images(client: Client) -> None:
 
     assert results[0]["image"] is not None
     assert results[1]["image"] is None
+
+
+@pytest.mark.django_db
+def test_list_groups_with_categories_success(client: Client) -> None:
+    """Test that groups with categories are listed correctly."""
+    # Arrange
+    user = create_test_user()
+    currency = create_test_currency()
+
+    category_1 = create_emoji_test_category(name="Trip", emoji="🛫")
+    category_2 = create_emoji_test_category(name="Holiday", emoji="🏖️")
+
+    group = create_test_group(
+        title="Miami Summer 2024 Squad 🌴",
+        description="Planning our Miami beach vacation!",
+        currency=currency,
+        created_by=user,
+    )
+
+    group.categories.add(category_1, category_2)
+
+    client.force_login(user)
+
+    # Act
+    response = client.get("/api/groups/")
+    response_data = response.json()
+    results = response_data["results"]
+
+    expected_result_count = 1
+    expected_category_count = 2
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+
+    assert len(results) == expected_result_count
+
+    assert results[0]["id"] == str(group.id)
+    assert results[0]["title"] == "Miami Summer 2024 Squad 🌴"
+    assert results[0]["description"] == "Planning our Miami beach vacation!"
+    assert results[0]["currency"] == str(currency.id)
+    assert results[0]["created_by"] == str(user.pk)
+    assert len(results[0]["categories"]) == expected_category_count
+    assert results[0]["updated_by"] is None
+    assert results[0]["created_at"]
+    assert results[0]["updated_at"]
+
+
+@pytest.mark.django_db
+def test_list_groups_with_and_without_categories_success(client: Client) -> None:
+    """Test that groups both with and without categories are listed correctly."""
+    # Arrange
+    user = create_test_user()
+    currency = create_test_currency()
+
+    category_1 = create_emoji_test_category(name="Trip", emoji="🛫")
+    category_2 = create_emoji_test_category(name="Holiday", emoji="🏖️")
+
+    group_with_categories = create_test_group(
+        title="Group with categories",
+        description="This group has categories",
+        currency=currency,
+        created_by=user,
+    )
+    group_with_categories.categories.add(category_1, category_2)
+
+    group_without_categories = create_test_group(
+        title="Group without categories",
+        description="This group has no categories",
+        currency=currency,
+        created_by=user,
+    )
+
+    client.force_login(user)
+
+    # Act
+    response = client.get("/api/groups/")
+    response_data = response.json()
+    results = response_data["results"]
+
+    expected_result_count = 2
+    expected_category_count = 2
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+
+    assert len(results) == expected_result_count
+
+    # Group with categories
+    assert results[0]["id"] == str(group_with_categories.id)
+    assert results[0]["title"] == "Group with categories"
+    assert results[0]["description"] == "This group has categories"
+    assert results[0]["currency"] == str(currency.id)
+    assert len(results[0]["categories"]) == expected_category_count
+    assert results[0]["created_by"] == str(user.pk)
+    assert results[0]["updated_by"] is None
+    assert results[0]["created_at"]
+    assert results[0]["updated_at"]
+
+    # Group without categories
+    assert results[1]["id"] == str(group_without_categories.id)
+    assert results[1]["title"] == "Group without categories"
+    assert results[1]["description"] == "This group has no categories"
+    assert results[1]["currency"] == str(currency.id)
+    assert results[1]["categories"] == []
+    assert results[1]["created_by"] == str(user.pk)
+    assert results[1]["updated_by"] is None
+    assert results[1]["created_at"]
+    assert results[1]["updated_at"]
+
+
+@pytest.mark.django_db
+def test_unauthenticated_fails(client: Client) -> None:
+    """Test that unauthenticated users cannot retrieve a list of groups."""
+    # Arrange
+    user = create_test_user()
+
+    currency_usd = create_test_currency(
+        name="USD",
+        symbol="$",
+        code="USD",
+    )
+
+    create_test_group(
+        currency=currency_usd,
+        created_by=user,
+    )
+
+    # Act
+    response = client.get("/api/groups/")
+
+    # Assert
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED

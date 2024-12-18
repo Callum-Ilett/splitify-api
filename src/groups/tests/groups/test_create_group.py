@@ -5,6 +5,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
 from rest_framework import status
 
+from categories.tests.test_helpers import create_emoji_test_category
 from core.test_helpers import create_test_image, create_test_user
 from currency.tests.test_helpers import create_test_currency
 from groups.tests.groups.test_delete_group import create_test_group
@@ -36,6 +37,42 @@ def test_create_group_success(client: Client) -> None:
     assert response_data["title"] == "Miami Summer 2024 Squad 🌴"
     assert response_data["description"] == "Planning our Miami beach vacation!"
     assert response_data["currency"] == str(currency.id)
+    assert response_data["created_by"] == str(user.pk)
+    assert response_data["updated_by"] is None
+    assert response_data["created_at"]
+    assert response_data["updated_at"]
+
+
+@pytest.mark.django_db
+def test_create_group_with_categories_success(client: Client) -> None:
+    """Test that a group can be created with categories successfully."""
+    # Arrange
+    user = create_test_user()
+    currency = create_test_currency()
+    category_1 = create_emoji_test_category(name="Trip", emoji="🛫")
+    category_2 = create_emoji_test_category(name="Holiday", emoji="🏖️")
+
+    payload = {
+        "title": "Miami Summer 2024 Squad 🌴",
+        "description": "Planning our Miami beach vacation!",
+        "currency": str(currency.id),
+        "categories": [str(category_1.id), str(category_2.id)],
+    }
+
+    client.force_login(user)
+
+    # Act
+    response = client.post("/api/groups/", payload, "application/json")
+    response_data = response.json()
+
+    # Assert
+    assert response.status_code == status.HTTP_201_CREATED
+
+    assert response_data["id"]
+    assert response_data["title"] == "Miami Summer 2024 Squad 🌴"
+    assert response_data["description"] == "Planning our Miami beach vacation!"
+    assert response_data["currency"] == str(currency.id)
+    assert response_data["categories"] == [str(category_1.id), str(category_2.id)]
     assert response_data["created_by"] == str(user.pk)
     assert response_data["updated_by"] is None
     assert response_data["created_at"]
@@ -425,3 +462,58 @@ def test_create_group_with_json_and_image_fails(client: Client) -> None:
         response_data["image"][0]
         == "The submitted data was not a file. Check the encoding type on the form."
     )
+
+
+@pytest.mark.django_db
+def test_create_group_with_invalid_category_fails(client: Client) -> None:
+    """Test that a group cannot be created with a non-existent category."""
+    # Arrange
+    user = create_test_user()
+    currency = create_test_currency()
+    invalid_category_id = "12345678-1234-5678-1234-567812345678"
+
+    payload = {
+        "title": "Miami Summer 2024 Squad 🌴",
+        "description": "Planning our Miami beach vacation!",
+        "currency": str(currency.id),
+        "categories": [invalid_category_id],
+    }
+
+    client.force_login(user)
+
+    # Act
+    response = client.post("/api/groups/", payload, "application/json")
+    response_data = response.json()
+
+    # Assert
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert (
+        response_data["categories"][0]
+        == 'Invalid pk "12345678-1234-5678-1234-567812345678" - object does not exist.'
+    )
+
+
+@pytest.mark.django_db
+def test_create_group_with_invalid_category_format_fails(client: Client) -> None:
+    """Test that a group cannot be created with malformed category IDs."""
+    # Arrange
+    user = create_test_user()
+    currency = create_test_currency()
+
+    payload = {
+        "title": "Miami Summer 2024 Squad 🌴",
+        "description": "Planning our Miami beach vacation!",
+        "currency": str(currency.id),
+        "categories": ["not-a-uuid"],
+    }
+
+    client.force_login(user)
+
+    # Act
+    response = client.post("/api/groups/", payload, "application/json")
+    response_data = response.json()
+
+    # Assert
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    assert response_data["categories"][0] == "“not-a-uuid” is not a valid UUID."
