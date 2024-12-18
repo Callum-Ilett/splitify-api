@@ -7,7 +7,20 @@ from django.db import models
 
 
 class Category(models.Model):
-    """A category for a group or an expense."""
+    """
+    A category for a group or an expense.
+
+    Attributes:
+        - id: UUID field representing the category's unique identifier
+        - name: CharField representing the category's name
+        - emoji: CharField representing the category's emoji
+        - icon: ImageField representing the category's icon
+        - background_color: ColorField representing the category's background color
+        - parent: ForeignKey to the category's parent category
+        - created_at: DateTimeField representing when the category was created
+        - updated_at: DateTimeField representing when the category was last updated
+
+    """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
