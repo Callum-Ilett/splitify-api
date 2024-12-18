@@ -38,8 +38,8 @@ def test_patch_success(client: Client) -> None:
     assert response_data["title"] == "Miami Summer 2024 Squad(edited)🌴"
     assert response_data["description"] == "Planning our Miami beach vacation!"
     assert response_data["currency"] == str(group.currency.id)
-    assert response_data["created_by"] == user.id  # type: ignore
-    assert response_data["updated_by"] == user.id  # type: ignore
+    assert response_data["created_by"] == str(user.pk)
+    assert response_data["updated_by"] == str(user.pk)
     assert response_data["created_at"]
     assert response_data["updated_at"]
 
@@ -79,8 +79,8 @@ def test_put_success(client: Client) -> None:
     assert response_data["title"] == "Miami Winter 2025(edited)🌴"
     assert response_data["description"] == "Crazy going in the winter! What to wear?"
     assert response_data["currency"] == str(currency.id)
-    assert response_data["created_by"] == user.id  # type: ignore
-    assert response_data["updated_by"] == user.id  # type: ignore
+    assert response_data["created_by"] == str(user.pk)
+    assert response_data["updated_by"] == str(user.pk)
     assert response_data["created_at"]
     assert response_data["updated_at"]
 
@@ -122,8 +122,8 @@ def test_update_patch_group_image_success(client: Client) -> None:
     assert response_data["image"] is not None
     assert response_data["image"].startswith("http://testserver/media/groups/images/")
     assert response_data["image"].endswith(".png")
-    assert response_data["created_by"] == user.id  # type: ignore
-    assert response_data["updated_by"] == user.id  # type: ignore
+    assert response_data["created_by"] == str(user.pk)
+    assert response_data["updated_by"] == str(user.pk)
     assert response_data["created_at"]
     assert response_data["updated_at"]
 
@@ -168,8 +168,8 @@ def test_update_put_group_image_success(client: Client) -> None:
     assert response_data["image"] is not None
     assert response_data["image"].startswith("http://testserver/media/groups/images/")
     assert response_data["image"].endswith(".png")
-    assert response_data["created_by"] == user.id  # type: ignore
-    assert response_data["updated_by"] == user.id  # type: ignore
+    assert response_data["created_by"] == str(user.pk)
+    assert response_data["updated_by"] == str(user.pk)
     assert response_data["created_at"]
     assert response_data["updated_at"]
 

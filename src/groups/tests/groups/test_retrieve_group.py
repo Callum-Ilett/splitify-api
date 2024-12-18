@@ -34,7 +34,7 @@ def test_retrieve_success(client: Client) -> None:
     assert response_data["title"] == "Miami Summer 2024 Squad 🌴"
     assert response_data["description"] == "Planning our Miami beach vacation!"
     assert response_data["currency"] == str(currency.id)
-    assert response_data["created_by"] == user.id  # type: ignore
+    assert response_data["created_by"] == str(user.pk)
     assert response_data["updated_by"] is None
     assert response_data["created_at"]
     assert response_data["updated_at"]
@@ -69,7 +69,7 @@ def test_retrieve_image_success(client: Client) -> None:
     assert response_data["currency"] == str(currency.id)
     assert "image" in response_data
     assert response_data["image"] is not None
-    assert response_data["created_by"] == user.id  # type: ignore
+    assert response_data["created_by"] == str(user.pk)
     assert response_data["updated_by"] is None
     assert response_data["created_at"]
     assert response_data["updated_at"]
