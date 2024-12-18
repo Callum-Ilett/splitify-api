@@ -23,11 +23,18 @@ class Group(models.Model):
     """
     Model representing a group.
 
-    - id: UUID field representing the group's unique identifier.
-    - title: CharField representing the group's title.
-    - description: TextField representing the group's description.
-    - created_at: DateTimeField representing the group's creation date and time.
-    - updated_at: DateTimeField representing the group's last update date and time.
+    Attributes:
+        - id: UUID field representing the group's unique identifier
+        - title: CharField representing the group's title
+        - description: TextField representing the group's description
+        - currency: ForeignKey to the group's currency
+        - image: ImageField representing the group's image
+        - members: ManyToManyField to the group's members
+        - categories: ManyToManyField to the group's categories
+        - created_by: ForeignKey to the user who created the group
+        - updated_by: ForeignKey to the user who last updated the group
+        - created_at: DateTimeField representing when the group was created
+        - updated_at: DateTimeField representing when the group was last updated
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -74,7 +81,18 @@ class Group(models.Model):
 
 
 class GroupMember(models.Model):
-    """Model representing a group member."""
+    """
+    Model representing a group member.
+
+    Attributes:
+        - id: UUID field representing the group member's unique identifier
+        - user: ForeignKey to the group member's user
+        - group: ForeignKey to the group the member belongs to
+        - role: CharField representing the group member's role
+        - created_at: DateTimeField representing when the group member was created
+        - updated_at: DateTimeField representing when the group member was last updated
+
+    """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 

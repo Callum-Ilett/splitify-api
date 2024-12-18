@@ -6,7 +6,18 @@ from django.db import models
 
 
 class Currency(models.Model):
-    """Currency model."""
+    """
+    Currency model.
+
+    Attributes:
+        - id: UUID field representing the currency's unique identifier
+        - name: CharField representing the currency's name
+        - symbol: CharField representing the currency's symbol
+        - code: CharField representing the currency's code
+        - created_at: DateTimeField representing when the currency was created
+        - updated_at: DateTimeField representing when the currency was last updated
+
+    """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
