@@ -11,5 +11,11 @@
 	"python.testing.unittestEnabled": false,
 	"python.testing.pytestEnabled": true,
 	"python.experiments.optInto": ["pythonTestAdapter"],
-	"python.testing.pytestArgs": ["src", "-v", "--cov=src/", "--cov-report=xml"]
+	"python.testing.pytestArgs": [
+		"-s",
+		"src",
+		"-v",
+		"--cov=src/",
+		"--cov-report=xml"
+	]
 }

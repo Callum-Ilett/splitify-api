@@ -122,10 +122,10 @@ def test_invalid_role() -> None:
     # Arrange
     user = create_test_user()
     currency = create_test_currency()
-    group = Group.objects.create(title="Test Group", currency=currency)
+    group = Group.objects.create(title="Test Group", currency=currency, created_by=user)
 
     group_member = {
-        "user": str(user.id),  # type: ignore
+        "user": str(user.pk),
         "group": str(group.id),
         "role": "INVALID_ROLE",
     }

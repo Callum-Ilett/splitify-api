@@ -315,37 +315,45 @@ class TestListGroupMembersView:
     def test_list_group_members_success(self, client: Client) -> None:
         """Test that group members can be listed."""
         # Arrange
-        user1 = create_test_user(username="user1", email="user1@test.com")
-        user2 = create_test_user(username="user2", email="user2@test.com")
-        group = create_test_group()
+        user_1 = create_test_user(username="user1", email="user1@test.com")
+        user_2 = create_test_user(username="user2", email="user2@test.com")
+        user_3 = create_test_user(username="user3", email="user3@test.com")
+        group = create_test_group(created_by=user_1)
 
-        create_test_group_member(user=user1, group=group)
-        create_test_group_member(user=user2, group=group, role=GroupMemberRole.ADMIN)
+        create_test_group_member(user=user_2, group=group, role=GroupMemberRole.MEMBER)
+        create_test_group_member(user=user_3, group=group, role=GroupMemberRole.ADMIN)
 
-        client.force_login(user1)
+        client.force_login(user_1)
 
         # Act
         response = client.get("/api/group-members/")
         response_data = response.json()
 
-        expected_count = 2
+        expected_count = 3  # 1 owner automatically created, 2 members
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
 
-        assert response_data["count"] == expected_count
         assert len(response_data["results"]) == expected_count
+
+        assert response_data["count"] == expected_count
         assert response_data["results"][0]["group"] == str(group.id)
-        assert response_data["results"][0]["user"] == str(user1.pk)
-        assert response_data["results"][0]["role"] == GroupMemberRole.MEMBER
+        assert response_data["results"][0]["user"] == str(user_1.pk)
+        assert response_data["results"][0]["role"] == str(GroupMemberRole.OWNER)
         assert response_data["results"][0]["created_at"]
         assert response_data["results"][0]["updated_at"]
 
         assert response_data["results"][1]["group"] == str(group.id)
-        assert response_data["results"][1]["user"] == str(user2.pk)
-        assert response_data["results"][1]["role"] == GroupMemberRole.ADMIN
+        assert response_data["results"][1]["user"] == str(user_2.pk)
+        assert response_data["results"][1]["role"] == str(GroupMemberRole.MEMBER)
         assert response_data["results"][1]["created_at"]
         assert response_data["results"][1]["updated_at"]
+
+        assert response_data["results"][2]["group"] == str(group.id)
+        assert response_data["results"][2]["user"] == str(user_3.pk)
+        assert response_data["results"][2]["role"] == str(GroupMemberRole.ADMIN)
+        assert response_data["results"][2]["created_at"]
+        assert response_data["results"][2]["updated_at"]
 
     @pytest.mark.django_db
     def test_list_empty_group_members_success(self, client: Client) -> None:

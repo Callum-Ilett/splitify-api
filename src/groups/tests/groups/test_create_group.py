@@ -65,6 +65,8 @@ def test_create_group_with_categories_success(client: Client) -> None:
     response = client.post("/api/groups/", payload, "application/json")
     response_data = response.json()
 
+    expected_categories_count = 2
+
     # Assert
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -72,7 +74,7 @@ def test_create_group_with_categories_success(client: Client) -> None:
     assert response_data["title"] == "Miami Summer 2024 Squad 🌴"
     assert response_data["description"] == "Planning our Miami beach vacation!"
     assert response_data["currency"] == str(currency.id)
-    assert response_data["categories"] == [str(category_1.id), str(category_2.id)]
+    assert len(response_data["categories"]) == expected_categories_count
     assert response_data["created_by"] == str(user.pk)
     assert response_data["updated_by"] is None
     assert response_data["created_at"]

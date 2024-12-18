@@ -4,6 +4,8 @@ import uuid
 
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from categories.models import Category
 from currency.models import Currency
@@ -95,3 +97,17 @@ class GroupMember(models.Model):
     def __str__(self) -> str:
         """Return the string representation of the group member."""
         return f"{self.user.username} - {self.group.title}"
+
+
+@receiver(post_save, sender=Group)
+def create_group_member(sender, instance, created, **kwargs) -> None:  # noqa: ANN001, ANN003, ARG001
+    """
+    Create an owner group member when a new group is created.
+
+    This signal handler automatically creates a GroupMember instance with the owner role
+    for the user who created the group, but only if the group is newly created.
+    """
+    if created and instance.members.count() == 0:
+        GroupMember.objects.create(
+            group=instance, user=instance.created_by, role=GroupMemberRole.OWNER
+        )
