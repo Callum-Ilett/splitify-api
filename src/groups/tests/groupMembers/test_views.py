@@ -134,7 +134,7 @@ class TestCreateGroupMemberView:
 
         payload = {
             "group": str(group.id),
-            "user": str(user.id),  # type: ignore
+            "user": str(user.pk),
             "role": GroupMemberRole.MEMBER,
         }
 
@@ -148,7 +148,7 @@ class TestCreateGroupMemberView:
         assert response.status_code == status.HTTP_201_CREATED
 
         assert response_data["group"] == str(group.id)
-        assert response_data["user"] == user.id  # type: ignore
+        assert response_data["user"] == str(user.pk)
         assert response_data["role"] == GroupMemberRole.MEMBER
         assert response_data["created_at"]
         assert response_data["updated_at"]
@@ -162,7 +162,7 @@ class TestCreateGroupMemberView:
 
         payload = {
             "group": str(group.id),
-            "user": str(user.id),  # type: ignore
+            "user": str(user.pk),
             "role": GroupMemberRole.ADMIN,
         }
 
@@ -176,7 +176,7 @@ class TestCreateGroupMemberView:
         assert response.status_code == status.HTTP_201_CREATED
 
         assert response_data["group"] == str(group.id)
-        assert response_data["user"] == user.id  # type: ignore
+        assert response_data["user"] == str(user.pk)
         assert response_data["role"] == GroupMemberRole.ADMIN
         assert response_data["created_at"]
         assert response_data["updated_at"]
@@ -190,7 +190,7 @@ class TestCreateGroupMemberView:
 
         payload = {
             "group": str(group.id),
-            "user": str(user.id),  # type: ignore
+            "user": str(user.pk),
             "role": GroupMemberRole.OWNER,
         }
 
@@ -204,7 +204,7 @@ class TestCreateGroupMemberView:
         assert response.status_code == status.HTTP_201_CREATED
 
         assert response_data["group"] == str(group.id)
-        assert response_data["user"] == user.id  # type: ignore
+        assert response_data["user"] == str(user.pk)
         assert response_data["role"] == GroupMemberRole.OWNER
         assert response_data["created_at"]
         assert response_data["updated_at"]
@@ -241,7 +241,7 @@ class TestEditGroupMemberView:
         assert response.status_code == status.HTTP_200_OK
 
         assert response_data["group"] == str(group.id)
-        assert response_data["user"] == user.id  # type: ignore
+        assert response_data["user"] == str(user.pk)
         assert response_data["role"] == GroupMemberRole.ADMIN
         assert response_data["created_at"]
         assert response_data["updated_at"]
@@ -289,7 +289,7 @@ class TestRetrieveGroupMemberView:
         assert response.status_code == status.HTTP_200_OK
 
         assert response_data["group"] == str(group.id)
-        assert response_data["user"] == user.id  # type: ignore
+        assert response_data["user"] == str(user.pk)
         assert response_data["role"] == GroupMemberRole.MEMBER
         assert response_data["created_at"]
         assert response_data["updated_at"]
@@ -336,13 +336,13 @@ class TestListGroupMembersView:
         assert response_data["count"] == expected_count
         assert len(response_data["results"]) == expected_count
         assert response_data["results"][0]["group"] == str(group.id)
-        assert response_data["results"][0]["user"] == user1.id  # type: ignore
+        assert response_data["results"][0]["user"] == str(user1.pk)
         assert response_data["results"][0]["role"] == GroupMemberRole.MEMBER
         assert response_data["results"][0]["created_at"]
         assert response_data["results"][0]["updated_at"]
 
         assert response_data["results"][1]["group"] == str(group.id)
-        assert response_data["results"][1]["user"] == user2.id  # type: ignore
+        assert response_data["results"][1]["user"] == str(user2.pk)
         assert response_data["results"][1]["role"] == GroupMemberRole.ADMIN
         assert response_data["results"][1]["created_at"]
         assert response_data["results"][1]["updated_at"]

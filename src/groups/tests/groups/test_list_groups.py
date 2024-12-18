@@ -86,7 +86,7 @@ def test_ascending_order_success(client: Client) -> None:
     assert results[0]["title"] == "Christmas drinks 2024 🎄"
     assert results[0]["description"] == "Planning our Christmas drinks!"
     assert results[0]["currency"] == str(currency_usd.id)
-    assert results[0]["created_by"] == user_3.id  # type: ignore
+    assert results[0]["created_by"] == str(user_3.pk)
     assert results[0]["updated_by"] is None
     assert results[0]["created_at"]
     assert results[0]["updated_at"]
@@ -95,7 +95,7 @@ def test_ascending_order_success(client: Client) -> None:
     assert results[1]["title"] == "Lads sesh 🍻"
     assert results[1]["description"] == "Everyone is invited!"
     assert results[1]["currency"] == str(currency_eur.id)
-    assert results[1]["created_by"] == user_2.id  # type: ignore
+    assert results[1]["created_by"] == str(user_2.pk)
     assert results[1]["updated_by"] is None
     assert results[1]["created_at"]
     assert results[1]["updated_at"]
@@ -104,7 +104,7 @@ def test_ascending_order_success(client: Client) -> None:
     assert results[2]["title"] == "Miami Summer 2024 Squad 🌴"
     assert results[2]["description"] == "Planning our Miami beach vacation!"
     assert results[2]["currency"] == str(currency_usd.id)
-    assert results[2]["created_by"] == user_1.id  # type: ignore
+    assert results[2]["created_by"] == str(user_1.pk)
     assert results[2]["updated_by"] is None
     assert results[2]["created_at"]
     assert results[2]["updated_at"]
@@ -113,7 +113,7 @@ def test_ascending_order_success(client: Client) -> None:
     assert results[3]["title"] == "New years eve 2025 🎉"
     assert results[3]["description"] == "Let's celebrate the new year!"
     assert results[3]["currency"] == str(currency_gbp.id)
-    assert results[3]["created_by"] == user_1.id  # type: ignore
+    assert results[3]["created_by"] == str(user_1.pk)
     assert results[3]["updated_by"] is None
     assert results[3]["created_at"]
     assert results[3]["updated_at"]
