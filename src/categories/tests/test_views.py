@@ -356,24 +356,23 @@ class TestListCategoryView:
         # Assert
         assert response.status_code == status.HTTP_200_OK
 
-        assert response_data["count"] == expected_count
-        assert len(response_data["results"]) == expected_count
+        assert len(response_data) == expected_count
 
-        assert response_data["results"][0]["id"]
-        assert response_data["results"][0]["name"] == "Entertainment"
-        assert response_data["results"][0]["emoji"] == "🎬"
-        assert response_data["results"][0]["icon"]
-        assert response_data["results"][0]["background_color"] == "#FF0000"
-        assert response_data["results"][0]["created_at"]
-        assert response_data["results"][0]["updated_at"]
+        assert response_data[0]["id"]
+        assert response_data[0]["name"] == "Entertainment"
+        assert response_data[0]["emoji"] == "🎬"
+        assert response_data[0]["icon"]
+        assert response_data[0]["background_color"] == "#FF0000"
+        assert response_data[0]["created_at"]
+        assert response_data[0]["updated_at"]
 
-        assert response_data["results"][1]["id"]
-        assert response_data["results"][1]["name"] == "Food"
-        assert response_data["results"][1]["emoji"] == "🍕"
-        assert response_data["results"][1]["icon"]
-        assert response_data["results"][1]["background_color"] == "#00FF00"
-        assert response_data["results"][1]["created_at"]
-        assert response_data["results"][1]["updated_at"]
+        assert response_data[1]["id"]
+        assert response_data[1]["name"] == "Food"
+        assert response_data[1]["emoji"] == "🍕"
+        assert response_data[1]["icon"]
+        assert response_data[1]["background_color"] == "#00FF00"
+        assert response_data[1]["created_at"]
+        assert response_data[1]["updated_at"]
 
     @pytest.mark.django_db
     def test_list_categories_empty_success(self, client: Client) -> None:
@@ -389,50 +388,7 @@ class TestListCategoryView:
         # Assert
         assert response.status_code == status.HTTP_200_OK
 
-        assert response_data["count"] == 0
-        assert len(response_data["results"]) == 0
-
-    @pytest.mark.django_db
-    def test_list_categories_pagination_success(self, client: Client) -> None:
-        """Test that categories are paginated correctly."""
-        # Arrange
-        user = create_test_user()
-
-        # Create 15 categories (more than default page size of 10)
-        for i in range(15):
-            create_emoji_test_category(
-                name=f"Category {i}",
-                emoji="🎯",
-                background_color="#FF0000",
-                icon=f"icon{i}.png",
-            )
-
-        client.force_login(user)
-
-        # Act - First page
-        response = client.get("/api/categories/")
-        response_data = response.json()
-        total_expected_count = 15
-        first_page_expected_count = 10
-        second_page_expected_count = 5
-
-        # Assert - First page
-        assert response.status_code == status.HTTP_200_OK
-        assert response_data["count"] == total_expected_count
-        assert len(response_data["results"]) == first_page_expected_count
-        assert response_data["next"] is not None
-        assert response_data["previous"] is None
-
-        # Act - Second page
-        response = client.get(response_data["next"])
-        response_data = response.json()
-
-        # Assert - Second page
-        assert response.status_code == status.HTTP_200_OK
-        assert response_data["count"] == total_expected_count
-        assert len(response_data["results"]) == second_page_expected_count
-        assert response_data["next"] is None
-        assert response_data["previous"] is not None
+        assert len(response_data) == 0
 
 
 class TestRetrieveCategoryView:
