@@ -246,23 +246,19 @@ class TestListCurrencyView:
         # Assert
         assert response.status_code == status.HTTP_200_OK
 
-        assert response_data["count"] == expected_count
-        assert response_data["next"] is None
-        assert response_data["previous"] is None
+        assert len(response_data) == expected_count
 
-        assert len(response_data["results"]) == expected_count
+        assert response_data[0]["name"] == "US Dollar"
+        assert response_data[0]["code"] == "USD"
+        assert response_data[0]["symbol"] == "$"
 
-        assert response_data["results"][0]["name"] == "US Dollar"
-        assert response_data["results"][0]["code"] == "USD"
-        assert response_data["results"][0]["symbol"] == "$"
+        assert response_data[1]["name"] == "UK Pound"
+        assert response_data[1]["code"] == "GBP"
+        assert response_data[1]["symbol"] == "£"
 
-        assert response_data["results"][1]["name"] == "UK Pound"
-        assert response_data["results"][1]["code"] == "GBP"
-        assert response_data["results"][1]["symbol"] == "£"
-
-        assert response_data["results"][2]["name"] == "Euro"
-        assert response_data["results"][2]["code"] == "EUR"
-        assert response_data["results"][2]["symbol"] == "€"
+        assert response_data[2]["name"] == "Euro"
+        assert response_data[2]["code"] == "EUR"
+        assert response_data[2]["symbol"] == "€"
 
     @pytest.mark.django_db
     def test_list_currency_empty_success(self, client: Client) -> None:
@@ -281,11 +277,8 @@ class TestListCurrencyView:
         # Assert
         assert response.status_code == status.HTTP_200_OK
 
-        assert response_data["count"] == 0
-        assert response_data["next"] is None
-        assert response_data["previous"] is None
-
-        assert len(response_data["results"]) == 0
+        assert response_data == []
+        assert len(response_data) == 0
 
 
 class TestUpdateCurrencyView:
